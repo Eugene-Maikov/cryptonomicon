@@ -51,7 +51,7 @@
                 {{ t.name }} - USD
               </dt>
               <dd class="mt-1 text-3xl font-semibold text-gray-900">
-                {{ t.price }}
+                {{ formatPrice(t.price) }}
               </dd>
             </div>
             <div class="w-full border-t border-gray-200"></div>
@@ -109,7 +109,7 @@
 // [x] График сломан если везде одинаковые значения
 // [x] При удалении тикера остается выбор
 
-import { loadTicker } from './api';
+import { loadTickers } from './api';
 
 export default {
   name: "App",
@@ -150,10 +150,9 @@ export default {
 
     if (tickersData) {
       this.tickers = JSON.parse(tickersData);
-      this.tickers.forEach(ticker => {
-        this.subscribeToUpdates(ticker.name);
-      });
     }
+
+    setInterval(this.updateTickers, 5000)
   },
   computed: {
     startIndex() {
@@ -191,21 +190,24 @@ export default {
     }
   },
   methods: {
-    subscribeToUpdates(tickerName) {
-      setInterval(async () => {
-        const exchangeData = await loadTicker(tickerName)
+    formatPrice(price) {
+      if (price === "-") {
+        return price
+      }
+      return price > 1 ? price.toFixed(2) : price.toPrecision(2)
+    },
 
-        // currentTicker.price =  data.USD > 1 ? exchangeData.USD.toFixed(2) : exchangeData.USD.toPrecision(2)
-        this.tickers.find(t => t.name === tickerName).price =
-          exchangeData.USD > 1 
-          ? exchangeData.USD.toFixed(2) 
-          : exchangeData.USD.toPrecision(2);
+    async updateTickers() {
+      if (!this.tickers.length) {
+        return
+      }
+      const exchangeData = await loadTickers(this.tickers.map(t => t.name))
 
-        if (this.selectedTicker?.name === tickerName) {
-          this.graph.push(exchangeData.USD);
-        }
-      }, 5000);
-      this.ticker = "";
+      this.tickers.forEach(ticker => {
+        const price = exchangeData[ticker.name.toUpperCase()]
+
+        ticker.price = price ?? "-"
+      })
     },
 
     add() {
@@ -214,7 +216,7 @@ export default {
         price: "-"
       };
 
-      this.tickers = [...this.tickers, currentTicker];
+      this.tickers = [...this.tickers, currentTicker]
       this.filter = "";
 
       this.subscribeToUpdates(currentTicker.name);
@@ -248,7 +250,7 @@ export default {
       }
     },
     filter() {
-      this.page = 1;
+      this.page = 1
     },
     pageStateOptions(value) {
       window.history.pushState(
