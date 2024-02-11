@@ -109,7 +109,7 @@
 // [x] График сломан если везде одинаковые значения
 // [x] При удалении тикера остается выбор
 
-import { loadTickers } from './api';
+// import { loadTickers } from './api';
 import { subscribeToTicker } from './api';
 
 export default {
@@ -153,7 +153,9 @@ export default {
       this.tickers = JSON.parse(tickersData);
 
       this.tickers.forEach(ticker => {
-        subscribeToTicker(ticker.name, () => {})
+        subscribeToTicker(ticker.name, newPrice =>
+          this.updateTicker(ticker.name, newPrice)
+        )
       })
     }
 
@@ -195,6 +197,14 @@ export default {
     }
   },
   methods: {
+    updateTicker(tickerName, price) {
+      this.tickers
+        .filter(t => t.name === tickerName)
+        .forEach(t => {
+          t.price = price
+        })
+    },
+
     formatPrice(price) {
       if (price === "-") {
         return price
@@ -203,16 +213,16 @@ export default {
     },
 
     async updateTickers() {
-      if (!this.tickers.length) {
-        return
-      }
-      const exchangeData = await loadTickers(this.tickers.map(t => t.name))
+      // if (!this.tickers.length) {
+      //   return
+      // }
+      // const exchangeData = await loadTickers(this.tickers.map(t => t.name))
 
-      this.tickers.forEach(ticker => {
-        const price = exchangeData[ticker.name.toUpperCase()]
+      // this.tickers.forEach(ticker => {
+      //   const price = exchangeData[ticker.name.toUpperCase()]
 
-        ticker.price = price ?? "-"
-      })
+      //   ticker.price = price ?? "-"
+      // })
     },
 
     add() {
@@ -224,7 +234,9 @@ export default {
       this.tickers = [...this.tickers, currentTicker]
       this.filter = "";
 
-      subscribeToTicker(this.ticker.name, () => {})
+      subscribeToTicker(this.ticker.name, newPrice =>
+          this.updateTicker(this.ticker.name, newPrice)
+        )
     },
 
     select(ticker) {
