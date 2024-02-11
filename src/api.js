@@ -3,13 +3,13 @@ const API_KEY =
 
 export const loadTickers = tickers =>
     fetch(
-        `https://min-api.cryptocompare.com/data/price?fsym=USD&tsyms=${tickers.join(
+        `https://min-api.cryptocompare.com/data/pricemulti?fsym=${tickers.join(
             ","
-        )}&api_key=${API_KEY}`
+        )}&tsyms=USD&api_key=${API_KEY}`
     )
         .then(r => r.json())
         .then(rawData =>
             Object.fromEntries(
-                Object.entries(rawData).map(([key, value]) => [key, 1 / value])
+                Object.entries(rawData).map(([key, value]) => [key, value.USD])
             )
         )
