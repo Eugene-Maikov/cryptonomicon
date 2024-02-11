@@ -110,6 +110,7 @@
 // [x] При удалении тикера остается выбор
 
 import { loadTickers } from './api';
+import { subscribeToTicker } from './api';
 
 export default {
   name: "App",
@@ -150,6 +151,10 @@ export default {
 
     if (tickersData) {
       this.tickers = JSON.parse(tickersData);
+
+      this.tickers.forEach(ticker => {
+        subscribeToTicker(ticker.name, () => {})
+      })
     }
 
     setInterval(this.updateTickers, 5000)
@@ -219,7 +224,7 @@ export default {
       this.tickers = [...this.tickers, currentTicker]
       this.filter = "";
 
-      this.subscribeToUpdates(currentTicker.name);
+      subscribeToTicker(this.ticker.name, () => {})
     },
 
     select(ticker) {
