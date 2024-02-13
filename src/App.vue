@@ -109,7 +109,6 @@
 // [x] График сломан если везде одинаковые значения
 // [x] При удалении тикера остается выбор
 
-// import { loadTickers } from './api';
 import { subscribeToTicker, unsubscribeFromTicker } from './api';
 
 export default {
@@ -221,7 +220,6 @@ export default {
       this.tickers = [...this.tickers, currentTicker]
       this.ticker = "";
       this.filter = "";
-
       subscribeToTicker(currentTicker.name, newPrice =>
           this.updateTicker(currentTicker.name, newPrice)
         )
